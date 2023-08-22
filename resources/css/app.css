@@ -7,6 +7,14 @@ td > ul{
     margin-left: 15px;
 }
 
+.dataTables_wrapper .dataTables_length select {
+    background-position: left 1.1rem center;
+}
+
+.ck-placeholder{
+    display: none;
+}
+
 /*th:hover, td:hover{*/
 /*    resize: both;*/
 /*    overflow: hidden;*/

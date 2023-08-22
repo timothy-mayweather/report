@@ -32,14 +32,14 @@ Route::get('/', [AuthenticatedSessionController::class, 'create']);
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-	Route::post('upload', App\Http\Controllers\UploadController::class)->name('upload.post');
+	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 	Route::get('/dashboard', function () {
 		return Inertia::render('Dashboard', ['init'=>json_encode([]), 'people'=>json_encode([])]);
 	})->middleware(['auth', 'verified'])->name('dashboard');
 
+	Route::resource('upload', App\Http\Controllers\UploadController::class)->only(['index','store'])->middleware(['auth','verified']);
 	Route::resource('reports', ReportController::class)->only(['index','store', 'update', 'destroy'])->middleware(['auth','verified']);
 });
 

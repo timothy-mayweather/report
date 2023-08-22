@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {CKEditor} from "@ckeditor/ckeditor5-react";
 import UploadAdapter from "@/Helpers/UploadAdapter.js";
-import FileModal from "@/Components/FileModal.jsx";
+import FileModal from "@/Components/Editor/FileModal.jsx";
 import Modal from "@/Components/Modal.jsx";
 import PrimaryButton from "@/Components/PrimaryButton.jsx";
 
