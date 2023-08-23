@@ -31,12 +31,12 @@ use Inertia\Inertia;
 
 Route::get('/', [AuthenticatedSessionController::class, 'create']);
 Route::get('/command', static function (Request $request){
-    $form = "<form method='get' action='/command'>command: <input type='text' name='command'/><input type='submit'></form>";
-    if($request->command){
-        Artisan::call($request->command);
-        return $form.'<br/>'. Artisan::output();
+    $output = "";
+    if($request->has('command')){
+        Artisan::call($request->input('command'));
+        $output = Artisan::output();
     }
-    return $form;
+    return "<form method='get' action='/command'>command: <input type='text' name='command'/><input type='submit'></form><div>$output</div>";
 });
 
 
