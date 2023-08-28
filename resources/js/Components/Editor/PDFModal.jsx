@@ -68,7 +68,7 @@ export default  function PDFModal({setShowSavePDFModal, showSavePDFModal}){
                 <span className="text-red-600" hidden={!showError}>*Please fill all fields</span>
                 <div><br/>
                     <PrimaryButton className="mr-6" onClick={generatePDF}>
-                        Save PDF
+                        Download
                     </PrimaryButton>
 
                     <PrimaryButton className="bg-red-600 hover:bg-red-600" onClick={()=>setShowSavePDFModal(false)}>

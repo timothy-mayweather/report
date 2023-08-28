@@ -15,6 +15,18 @@ td > ul{
     display: none;
 }
 
+/*.perm-admin {*/
+/*    background-color: red*/
+/*}*/
+
+/*.perm-supervisor{*/
+/*    background-color: yellow*/
+/*}*/
+
+/*.perm-employee{*/
+/*    background-color: green*/
+/*}*/
+
 /*th:hover, td:hover{*/
 /*    resize: both;*/
 /*    overflow: hidden;*/

@@ -1,47 +1,64 @@
 import React, {useState} from "react";
-// import DataTable from 'datatables.net-dt';
+import { router } from '@inertiajs/react'
 
-export default function FileModal() {
+export default function ReportModal() {
     const [showModal, setShowModal] = useState(false);
     const [modalChildren, setModalChildren] = useState(<tr></tr>);
-    const tableId = "filesTable";
-
-    function showFiles(){
-        axios.get("/upload").then((response)=>{
-            setModalChildren(response.data.map(
-                    (file)=><tr key={file['id']}>
-                        <td >{file['file_name']}</td>
-                        <td >{file['name']}</td>
-                        <td >{file['mime_type']}</td>
-                        <td ><a href={"/storage/"+file['path']} target="_blank"><u>view</u></a></td>
-                        <td >
-                            <button className="border p-2 inline-flex items-center px-4 py-2 bg-gray-800 border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2" type="button" onClick={()=>navigator.clipboard.writeText("/storage/"+file['path'])}>
-                                Copy Url
-                            </button>
-                        </td>
-                    </tr>
-                )
-            );
-            setShowModal(true);
-            $(document).ready(function(){ $("#"+tableId).DataTable(
-                {
-                    'columnDefs'        : [
+    const tableId = "reportsTable";
+    // ['id','filename','fileType','created_at','updated_at']
+    function showReports(){
+        axios.get("/reports/create").then((response)=>{
+            if(response.status === 200) {
+                setModalChildren(response.data.map(
+                        (file) => <tr key={file['id']}>
+                            <td>{file['filename']}</td>
+                            <td>{file['fileType']}</td>
+                            <td>{file['created_at']}</td>
+                            <td>{file['updated_at']}</td>
+                            <td><u className="cursor-pointer" onClick={() => {router.get('/reports', {reportId:file['id']})}}>edit</u></td>
+                        </tr>
+                    )
+                );
+                setShowModal(true);
+                $(document).ready(function () {
+                    $("#" + tableId).DataTable(
                         {
-                            'searchable'    : false,
-                            'targets'       : [3,4]
-                        },
-                    ]
-                }
-            ); });
-            // new DataTable("#"+tableId);
-        });
+                            'columnDefs': [
+                                {
+                                    'searchable': false,
+                                    'targets': [3, 4]
+                                },
+                            ]
+                        }
+                    );
+                });//show success
+            }else{
+                $.notify('an error occurred')
+            }
+
+        }).catch((error)=>{
+            $.notify(error.message) //show error
+        })
+    }
+
+    function loadReport(id){
+        axios.get("/report/"+id).then((response)=>{
+            if(response.status === 200) {
+                editor.setData(response.data['content']);
+            }
+            else{
+                $.notify('an error occurred')
+            }
+        }).catch((error)=>{
+            $.notify(error.message)//show error
+        })
     }
 
     return (
         <>
             <span className="inline-flex rounded-md">
-                <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={showFiles}>
-                    <span className="hover:text-gray-700">view uploads</span>
+                <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={showReports}>
+                    <span className="hover:text-gray-700">reports</span>
                 </button>
             </span>
             {showModal ? (
@@ -55,7 +72,7 @@ export default function FileModal() {
                                 {/*header*/}
                                 <div className="flex items-start justify-between p-2 border-b border-solid border-slate-200 rounded-t">
                                     <h3 className="text-3xl font-semibold justify-center p-2">
-                                        Uploaded Files
+                                        Reports
                                     </h3>
                                     <button
                                         className="p-2 ml-auto border-0 text-black float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
@@ -74,10 +91,10 @@ export default function FileModal() {
                                             <thead>
                                             <tr>
                                                 <th>Filename</th>
-                                                <th>Alias</th>
-                                                <th>Mimetype</th>
-                                                <th>Link</th>
-                                                <th>COPY URL</th>
+                                                <th>Type</th>
+                                                <th>Created At</th>
+                                                <th>Updated At</th>
+                                                <th></th>
                                             </tr>
                                             </thead>
                                             <tbody>

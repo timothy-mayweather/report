@@ -49,7 +49,9 @@ Route::middleware('auth')->group(function () {
 	})->middleware(['auth', 'verified'])->name('dashboard');
 
 	Route::resource('upload', App\Http\Controllers\UploadController::class)->only(['index','store'])->middleware(['auth','verified']);
-	Route::resource('reports', ReportController::class)->only(['index','store', 'update', 'destroy'])->middleware(['auth','verified']);
+	Route::resource('reports', ReportController::class)->middleware(['auth','verified']);
+	Route::get('templates', [ReportController::class, 'templates']);
+	Route::get('/template/{report}', [ReportController::class, 'template']);
 });
 
 require __DIR__.'/auth.php';

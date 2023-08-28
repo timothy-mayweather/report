@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reports', function (Blueprint $table) {
+        Schema::create('report_viewers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-						$table->string('filename');
-						$table->enum('fileType', ['report', 'template']);
-            $table->longText('content');
+		        $table->foreignId('report_id')->constrained()->cascadeOnDelete();
+		        $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-	          $table->softDeletes();
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reports');
+        Schema::dropIfExists('report_viewers');
     }
 };

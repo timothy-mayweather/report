@@ -10,7 +10,6 @@ export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
-        role: '',
         password: '',
         password_confirmation: '',
     });
@@ -30,7 +29,7 @@ export default function Register() {
     return (
         <GuestLayout>
             <Head title="Register" />
-
+            <p>After registration, please wait for Admin's approval to access the system</p><br/>
             <form onSubmit={submit}>
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
@@ -64,26 +63,6 @@ export default function Register() {
                     />
 
                     <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="role" value="Role" />
-
-                    <select
-                        id="role"
-                        name="role"
-                        value={data.role}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('role', e.target.value)}
-                        required
-                    >
-                        <option value=""></option>
-                        <option value="employee">Employee</option>
-                        <option value="supervisor">Supervisor</option>
-                    </select>
-
-                    <InputError message={errors.role} className="mt-2" />
                 </div>
 
                 <div className="mt-4">

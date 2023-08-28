@@ -33,6 +33,10 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+		    if($request->user()->role=="provisional"){
+					$request->session()->invalidate();
+			    return redirect('login')->with(['status'=>'Please wait for admin approval']);
+		    }
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }

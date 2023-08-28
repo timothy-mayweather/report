@@ -4,7 +4,7 @@ export default function ShowEditorButton({showTools, onClick}){
             <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={onClick}>
                 <span className="hover:text-gray-700">editor tools
                     <span >
-                        <svg style={showTools?{}:{transform: 'rotate(180deg)'}}
+                        <svg style={showTools?{transform: 'rotate(180deg)'}:{}}
                              className="ml-2 -mr-0.5 h-4 w-4 inline-flex"
                              xmlns="http://www.w3.org/2000/svg"
                              viewBox="0 0 20 20"
