@@ -15,7 +15,7 @@ export default  function LockModal({setShowLockModal, showLockModal, cell}){
        })
         close();
 
-        editor.setData(editor.ui.view.editable.element.innerHTML);
+        loadData(editor.ui.view.editable.element.innerHTML);
         showChanged()
     }
 

@@ -4,11 +4,12 @@ import {Head} from '@inertiajs/react'
 import Editor from "@/Components/Editor/Editor.jsx";
 
 export default function Index({auth, report}) {
+    let user = {...auth.user, isAdmin:auth.user.role==="admin"};
     return (
-        <Authenticated user={auth.user}>
+        <Authenticated user={user}>
             <Head title="Records"/>
             <div className="p-0">
-                <Editor report={report}/>
+                <Editor user={user} report={report}/>
             </div>
         </Authenticated>
     );

@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {router} from "@inertiajs/react";
 
-export default function TemplateModal() {
+export default function TemplateModal({user}) {
     const [showModal, setShowModal] = useState(false);
     const [modalChildren, setModalChildren] = useState(<tr></tr>);
     const tableId = "templatesTable";
@@ -16,7 +16,7 @@ export default function TemplateModal() {
                             <td>{file['created_at']}</td>
                             <td>{file['updated_at']}</td>
                             <td><u className="cursor-pointer" onClick={() => {loadTemplate(file['id']); $.notify('Loaded '+file['filename'], "info")}}>load</u></td>
-                            <td><u className="cursor-pointer" onClick={() => {router.get('/reports', {reportId:file['id']})}}>edit</u></td>
+                            {user.isAdmin&&<td><u className="cursor-pointer" onClick={() => {router.get('/reports', {reportId:file['id']})}}>edit</u></td>}
                         </tr>
                     )
                 );
@@ -27,7 +27,7 @@ export default function TemplateModal() {
                             'columnDefs': [
                                 {
                                     'searchable': false,
-                                    'targets': [3, 4]
+                                    'targets': [1,4]
                                 },
                             ]
                         }
@@ -45,7 +45,7 @@ export default function TemplateModal() {
     function loadTemplate(id){
         axios.get("/template/"+id).then((response)=>{
             if(response.status === 200) {
-                editor.setData(response.data['content']);
+                loadData(response.data['content']);
             }
             else{
                 $.notify('an error occurred')
@@ -96,7 +96,7 @@ export default function TemplateModal() {
                                                 <th>Created At</th>
                                                 <th>Updated At</th>
                                                 <th></th>
-                                                <th></th>
+                                                {user.isAdmin&&<th></th>}
                                             </tr>
                                             </thead>
                                             <tbody>

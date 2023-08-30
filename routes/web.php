@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -49,9 +50,11 @@ Route::middleware('auth')->group(function () {
 	})->middleware(['auth', 'verified'])->name('dashboard');
 
 	Route::resource('upload', App\Http\Controllers\UploadController::class)->only(['index','store'])->middleware(['auth','verified']);
+	Route::get('/reports/shared', [ReportController::class, 'createShared'])->name('reports.shared');
 	Route::resource('reports', ReportController::class)->middleware(['auth','verified']);
 	Route::get('templates', [ReportController::class, 'templates']);
 	Route::get('/template/{report}', [ReportController::class, 'template']);
+	Route::get('users', [UserController::class, 'index']);
 });
 
 require __DIR__.'/auth.php';

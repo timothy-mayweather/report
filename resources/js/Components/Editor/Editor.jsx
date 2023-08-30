@@ -11,8 +11,11 @@ import TemplateModal from "@/Components/Editor/TemplateModal.jsx";
 import ReportModal from "@/Components/Editor/ReportModal.jsx";
 
 
-export default function Editor({report}) {
-
+export default function Editor({user, report}) {
+    console.log(report)
+    if(!user.isAdmin && report['id']===null){
+        report['fileType'] = 'report'
+    }
     const [fileDetails, setFileDetails] = useState({
         id:report['id'], filename:report['filename'], fileType:report['fileType']
     })
@@ -63,23 +66,57 @@ export default function Editor({report}) {
         (fileDetails.id===null)?setShowSaveModal(true):edit()
     }
 
+    function removeEditing(){
+        if(!user.isAdmin) {
+            const adminAreas = document.getElementsByClassName('perm-admin');
+            const supervisorAreas = document.getElementsByClassName('perm-supervisor');
+            const employeeAreas = document.getElementsByClassName('perm-employee');
+            for(let el of adminAreas){
+                el.className = "perm-admin"
+                el.removeAttribute('role')
+                el.contentEditable = false
+            }
+
+            for(let el of supervisorAreas){
+                let isEditable = user.role==="supervisor"
+                el.contentEditable = isEditable
+                el.className = isEditable?el.className:"perm-supervisor"
+                if(!isEditable) {
+                    el.removeAttribute('role')
+                }
+            }
+
+            for(let el of employeeAreas){
+                let isEditable = user.role==="employee"
+                el.contentEditable = isEditable
+                el.className = isEditable?el.className:"perm-employee"
+                if(!isEditable) {
+                    el.removeAttribute('role')
+                }
+            }
+        }
+    }
+
 
     return (
         <div className="bg-white">
+            <div id="data-exchange" hidden={true}>
+                {/*treat data before sending it to editor from here*/}
+            </div>
             {/*file prompt modal*/}
-            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit}/>
+            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user}/>
             <PDFModal setShowSavePDFModal={setShowSavePDFModal} showSavePDFModal={showSavePDFModal}/>
             {clickedCell &&<LockModal setShowLockModal={setShowLockModal} showLockModal={showLockModal} cell={clickedCell}/>}
-            <div className="ml-4">
-                <span className="inline-flex rounded-md mr-6">
+            <div className="ml-3">
+                <span className="inline-flex rounded-md mr-6 mt-3">
                     {"Report Details>"}
                 </span>
                 <span className="inline-flex rounded-md mr-6">
                     Name: {fileDetails.filename}
                 </span>
-                <span className="inline-flex rounded-md mr-6">
+                {user.isAdmin&&<span className="inline-flex rounded-md mr-6">
                     Type: {fileDetails.fileType}
-                </span>
+                </span>}
                 {fileDetails.id===null? <span className="inline-flex rounded-md mr-6">
                     Not saved
                 </span>:
@@ -95,8 +132,8 @@ export default function Editor({report}) {
                     <ShowEditorButton onClick={()=>toggleShowState()} showTools={showTools}/>
                 </span>
                 <FileModal />
-                <ReportModal />
-                <TemplateModal />
+                <ReportModal user={user}/>
+                <TemplateModal user={user}/>
                 <span className="inline-flex rounded-md">
                     <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={onClickSave}>
                         <span className="hover:text-gray-700">Save</span>
@@ -132,15 +169,22 @@ export default function Editor({report}) {
                     }
                 }}
                 onReady={ editor => {
+                    window.loadData = function (data) {
+                        const exchangeArea = document.getElementById("data-exchange");
+                        exchangeArea.innerHTML=data
+                        removeEditing();
+                        window.editor.setData(exchangeArea.innerHTML)
+                    }
+
                     window.editor = editor;
 
-                    // editor.setData(recordTable)
+                    // loadData(recordTable)
                     editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
                         return new UploadAdapter(loader);
                     };
 
                     if(report['id']!==null) {
-                        editor.setData(report['content']);
+                        loadData(report['content']);
                     }
 
                     editor.on( 'change:isReadOnly', ( evt, propertyName, isReadOnly ) => {
@@ -148,11 +192,16 @@ export default function Editor({report}) {
                         // toggleShowState(!isReadOnly);
                     } );
 
-                    //only if user is admin
-                    editor.ui.view.editable.element.addEventListener('click', (ev)=>{
-                        setClickedCell(ev.target.closest('td')??ev.target.closest('th'))
-                    })
+                    if(user.isAdmin) {
+                        editor.ui.view.editable.element.addEventListener('click', (ev) => {
+                            setClickedCell(ev.target.closest('td') ?? ev.target.closest('th'))
+                        })
+                    }
                 } }
+
+                onFocus={()=>{
+
+                }}
             />
         </div>
     );

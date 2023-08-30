@@ -1,13 +1,18 @@
 import React, {useState} from "react";
 import { router } from '@inertiajs/react'
+import Dropdown from "@/Components/Dropdown.jsx";
 
-export default function ReportModal() {
+export default function ReportModal({user}) {
     const [showModal, setShowModal] = useState(false);
+    const [hideDropdown, setHideDropdown] = useState(true)
     const [modalChildren, setModalChildren] = useState(<tr></tr>);
     const tableId = "reportsTable";
+    const [reportHeading, setReportHeading] = useState(user.isAdmin?"Reports":"My Reports")
     // ['id','filename','fileType','created_at','updated_at']
-    function showReports(){
-        axios.get("/reports/create").then((response)=>{
+    function showReports(url = "/reports/create"){
+        if(!user.isAdmin)
+        setReportHeading(url.endsWith('create')?"My Reports":"Shared With Me")
+        axios.get(url).then((response)=>{
             if(response.status === 200) {
                 setModalChildren(response.data.map(
                         (file) => <tr key={file['id']}>
@@ -26,7 +31,7 @@ export default function ReportModal() {
                             'columnDefs': [
                                 {
                                     'searchable': false,
-                                    'targets': [3, 4]
+                                    'targets': [1, 4]
                                 },
                             ]
                         }
@@ -41,26 +46,34 @@ export default function ReportModal() {
         })
     }
 
-    function loadReport(id){
-        axios.get("/report/"+id).then((response)=>{
-            if(response.status === 200) {
-                editor.setData(response.data['content']);
-            }
-            else{
-                $.notify('an error occurred')
-            }
-        }).catch((error)=>{
-            $.notify(error.message)//show error
-        })
-    }
+    let mouseProps = user.isAdmin?{onClick:()=>showReports()}:{onMouseEnter:()=>setHideDropdown(false), onMouseLeave:()=>setHideDropdown(true)}
 
     return (
         <>
-            <span className="inline-flex rounded-md">
-                <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={showReports}>
-                    <span className="hover:text-gray-700">reports</span>
-                </button>
-            </span>
+            <div className="relative inline-block text-left">
+                <span className="inline-flex rounded-md">
+                    <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button"  {...mouseProps}>
+
+                        <span className="hover:text-gray-700">reports</span>
+                    </button>
+                </span>
+
+                <div className="absolute right-0 z-10 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1" hidden={hideDropdown} onMouseEnter={()=>setHideDropdown(false)} onMouseLeave={()=>setHideDropdown(true)}>
+                    <div className="py-1" role="none">
+                        <button className="inline-flex items-center px-4 py-2 border border-transparent" type="button" onClick={()=>router.get('/reports')}>
+                            <span className="hover:text-gray-700">New</span>
+                        </button><br/>
+                        <button className="inline-flex items-center px-4 py-2 border border-transparent" type="button" onClick={()=>showReports()}>
+                            <span className="hover:text-gray-700">My Reports</span>
+                        </button><br/>
+                        <button className="inline-flex items-center px-4 py-2 border border-transparent" type="button" onClick={()=>showReports("/reports/shared")}>
+                            <span className="hover:text-gray-700">Shared with me</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
             {showModal ? (
                 <>
                     <div
@@ -72,7 +85,7 @@ export default function ReportModal() {
                                 {/*header*/}
                                 <div className="flex items-start justify-between p-2 border-b border-solid border-slate-200 rounded-t">
                                     <h3 className="text-3xl font-semibold justify-center p-2">
-                                        Reports
+                                        {reportHeading}
                                     </h3>
                                     <button
                                         className="p-2 ml-auto border-0 text-black float-right text-3xl leading-none font-semibold outline-none focus:outline-none"

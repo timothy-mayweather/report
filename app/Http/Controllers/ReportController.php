@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use App\Models\ReportViewer;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,17 +19,45 @@ class ReportController extends Controller
      */
     public function index(Request $request): Response
     {
-        $report = ($request->has('reportId'))?Report::find($request->input('reportId')):['id'=>null, 'filename'=>'', 'fileType'=>''];
+		    $report = ($request->has('reportId')) ? Report::find($request->input('reportId'))->toArray() ?? ['id' => null, 'filename' => '', 'fileType' => ''] : ['id' => null, 'filename' => '', 'fileType' => ''];
+				if(!$request->user()->isAdmin() && $report['id']!==null) {
+					if($report['user_id']!==$request->user()->id){
+                        if(count($request->user()->reportViews()->where('report_id', $report['id'])->get()->toArray())==0) {
+	                        $report = ['id' => null, 'filename' => '', 'fileType' => ''];
+                        }
+					}else{
+                        $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
+                        $viewerIds = [];
+                        foreach ($viewers as $viewer){
+                            $viewerIds[] = $viewer['user_id'];
+                        }
+                        $users = User::whereIn('id', $viewerIds)->get();
+                        $report['users'] = $users;
+                    }
+				}
         return Inertia::render('Reports/Index',['report'=>$report]);
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function create(): \Illuminate\Http\Response
+    public function create(Request $request): \Illuminate\Http\Response
     {
-        return Response(Report::with('user:id, name')->where('fileType','=', 'report')->get(['id','filename','fileType','created_at','updated_at']));
+        return Response(
+					$request->user()->isAdmin()?
+						Report::where('fileType','=', 'report')->latest()->limit(400)->get(['id','filename','fileType','created_at','updated_at']):
+						$request->user()->reports()->where('fileType','=', 'report')->latest()->limit(400)->get(['id','filename','fileType','created_at','updated_at'])
+        );
     }
+
+	/**
+	 * Display a listing of the resource.
+	 */
+	public function createShared(Request $request): \Illuminate\Http\Response
+	{
+        $sharedReports = $request->user()->reportViews()->get(['report_id'])->toArray();
+		return Response(Report::whereIn('id',array_values($sharedReports))->latest()->limit(400)->get(['id','filename','fileType','created_at','updated_at']));
+	}
 
 	/**
 	 * Display a listing of the resource.
@@ -56,9 +86,31 @@ class ReportController extends Controller
             'filename' => 'required|string',
             'content' => 'required|string',
             'fileType' => ['required','string', Rule::in(['report', 'template']),],
+            'share' => 'required|string'
         ]);
+        $sharedIds = explode(",", $validated['share']);
+        unset($validated['share']);
+        $report = $request->user()->reports()->create($validated)->toArray();
+        if(count($sharedIds)>0){
+            $views = [];
+            foreach ($sharedIds as $sharedId){
+                $views[] = [
+	                'user_id' => $sharedId,
+	                'report_id' => $report['id'],
+	                'updated_at'=>date('Y-m-d H:i:s'),
+	                'created_at'=>date('Y-m-d H:i:s'),
+                ];
+            }
+            ReportViewer::insert($views);
+        }
 
-        $report = $request->user()->reports()->create($validated);
+	    $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
+	    $viewerIds = [];
+	    foreach ($viewers as $viewer){
+		    $viewerIds[] = $viewer['user_id'];
+	    }
+	    $users = User::whereIn('id', $viewerIds)->get();
+	    $report['users'] = $users;
 
         return Response($report);
     }
@@ -81,11 +133,54 @@ class ReportController extends Controller
 	        'filename' => 'required|string',
 	        'content' => 'required|string',
 	        'fileType' => ['required','string', Rule::in(['report', 'template']),],
+	        'share' => 'required|string'
         ]);
+	    $sharedIds = explode(",", $validated['share']);
+	    unset($validated['share']);
+	    $report->update($validated);
 
-        $report->update($validated);
+	    $arr = $report->toArray();
+	    $viewers = ReportViewer::where('report_id', $arr['id'])->get(['user_id'])->toArray();
+	    $currentViewerIds = [];
+	    foreach ($viewers as $viewer){
+		    $currentViewerIds[] = $viewer['user_id'];
+	    }
 
-        return Response($report);
+        $newSharedIds = [...$sharedIds];
+        if(count($sharedIds)>0){
+		    $views = [];
+		    foreach ($sharedIds as $sharedId){
+                $index = array_search($sharedId, $currentViewerIds);
+                if($index){
+                    unset($currentViewerIds[$index]);
+                    continue;
+                }
+			    $views[] = [
+				    'user_id' => $sharedId,
+				    'report_id' => $report['id'],
+				    'updated_at'=>date('Y-m-d H:i:s'),
+				    'created_at'=>date('Y-m-d H:i:s'),
+			    ];
+		    }
+            if(count($views)>0) {
+	            ReportViewer::insert($views);
+            }
+
+            if(count($currentViewerIds)>0){
+                $newViews = ReportViewer::where('report_id', $report->id)->get();
+                foreach ($newViews as $newView){
+	                $index = array_search($newView->user_id, $currentViewerIds);
+	                if($index){
+		                ReportViewer::find($newView->id)->delete();
+	                }
+                }
+            }
+	    }
+
+	    $users = User::whereIn('id', $newSharedIds)->get();
+	    $arr['users'] = $users;
+
+        return Response($arr);
     }
 
     /**

@@ -11,21 +11,13 @@ td > ul{
     background-position: left 1.1rem center;
 }
 
-.ck-placeholder{
+h1.ck-placeholder{
     display: none;
 }
-
-/*.perm-admin {*/
-/*    background-color: red*/
-/*}*/
-
-/*.perm-supervisor{*/
-/*    background-color: yellow*/
-/*}*/
-
-/*.perm-employee{*/
-/*    background-color: green*/
-/*}*/
+p.ck-placeholder{
+    margin-top: 20px;
+    height: 100px;
+}
 
 /*th:hover, td:hover{*/
 /*    resize: both;*/
@@ -33,3 +25,6 @@ td > ul{
 /*    max-height: fit-content;*/
 /*    max-width: fit-content;*/
 /*}*/
+
+
+
