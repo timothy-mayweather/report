@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('report_viewers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('report_id')->index('reports_viewed')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->index('report_viewers')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->index('report_viewers_index')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
