@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
 	    "                        <td></td>\n" .
 	    "                    </tr>\n" .
 	    "                    </tbody>\n" .
-	    "                </table><br/>\n";
+	    "                </table>\n";
 
 			Report::create([
 				'filename'=>'objectives template',

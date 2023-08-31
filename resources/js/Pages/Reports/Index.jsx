@@ -15,7 +15,3 @@ export default function Index({auth, report}) {
     );
 }
 
-//other authenticated items should look like this
-// <br/>
-// <div className="mx-auto p-4 sm:p-6 lg:p-8 bg-white"></div>
-

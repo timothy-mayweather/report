@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {CKEditor} from "@ckeditor/ckeditor5-react";
 import UploadAdapter from "@/Helpers/UploadAdapter.js";
 import FileModal from "@/Components/Editor/FileModal.jsx";
@@ -12,7 +12,6 @@ import ReportModal from "@/Components/Editor/ReportModal.jsx";
 
 
 export default function Editor({user, report}) {
-    console.log(report)
     if(!user.isAdmin && report['id']===null){
         report['fileType'] = 'report'
     }
@@ -25,15 +24,21 @@ export default function Editor({user, report}) {
     const [showTools, setShowTools] = useState(true)
     const [readonly, setReadonly] = useState(false)
     const [clickedCell, setClickedCell] = useState(null)
+    const [selectedShared, setSelectedShared] = useState(!report.hasOwnProperty('users')?{}:Object.fromEntries(new Map(report.users.map((us)=>[us.id, true]))))
+    // const [selected, setSelected] = useState(selectedShared)//set of ids with true if selected or false otherwise
+    const selected = useRef(selectedShared);
 
     function edit(){
         if(fileDetails.filename.trim().length===0 || fileDetails.fileType.trim().length===0){
             $.notify('Please enter all fields.')
         }else {
+            let idsToShare = Object.keys(selected.current).filter((id)=>selected.current[id]).toString()
+
             axios.put("/reports/"+fileDetails.id, {
                 filename: fileDetails.filename,
                 fileType: fileDetails.fileType,
-                content: editor.ui.view.editable.element.innerHTML
+                content: getEditAreaHtml(),
+                share: idsToShare.length===0?"0":idsToShare
             }).then((response)=>{
                 if(response.status===200){
                     setFileDetails({
@@ -41,6 +46,7 @@ export default function Editor({user, report}) {
                         fileType: response.data.fileType,
                         id: response.data.id
                     });
+                    setSelectedShared(Object.fromEntries(new Map(response.data.users.map((us)=>[us.id, true]))))
                     $.notify('Edited successfully', "success")
                 }else{
                     $.notify('An error occurred')
@@ -104,7 +110,7 @@ export default function Editor({user, report}) {
                 {/*treat data before sending it to editor from here*/}
             </div>
             {/*file prompt modal*/}
-            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user}/>
+            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user} selected={selected} selectedShared={selectedShared} initialMembers={report.hasOwnProperty('users')?Object.fromEntries(new Map(report.users.map((us)=>[us.id, us]))):{}}/>
             <PDFModal setShowSavePDFModal={setShowSavePDFModal} showSavePDFModal={showSavePDFModal}/>
             {clickedCell &&<LockModal setShowLockModal={setShowLockModal} showLockModal={showLockModal} cell={clickedCell}/>}
             <div className="ml-3">
@@ -174,6 +180,38 @@ export default function Editor({user, report}) {
                         exchangeArea.innerHTML=data
                         removeEditing();
                         window.editor.setData(exchangeArea.innerHTML)
+                    }
+
+                    window.getEditAreaHtml = function () {
+                        const exchangeArea = document.getElementById("data-exchange");
+                        exchangeArea.innerHTML=editor.ui.view.editable.element.innerHTML
+                        exchangeArea.querySelectorAll('.ck-table-column-resizer').forEach((el)=>{
+                            el.remove();
+                        })
+                        exchangeArea.querySelectorAll('.ck-table-bogus-paragraph').forEach((el)=>{
+                            el.className = el.className.replace("ck-table-bogus-paragraph", "")
+                            let children = el.children;
+                            for (let i = 0; i < children.length; i++) {
+                                if(children[i].tagName === "BR"){
+                                    children[i].remove()
+                                }
+                            }
+                            if(el.children.length===0 && el.innerText.length===0){
+                                el.remove()
+                            }
+                        })
+                        exchangeArea.querySelectorAll('p').forEach((el)=>{
+                            let children = el.children;
+                            if(children.length>0) {
+                                if (children[0].tagName === "BR") {
+                                    children[0].remove();
+                                }
+                                if(el.children.length===0 && el.innerText.length===0){
+                                    el.remove()
+                                }
+                            }
+                        })
+                        return exchangeArea.innerHTML;
                     }
 
                     window.editor = editor;

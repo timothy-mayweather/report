@@ -7,6 +7,7 @@ use App\Models\ReportViewer;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,7 +20,7 @@ class ReportController extends Controller
      */
     public function index(Request $request): Response
     {
-		    $report = ($request->has('reportId')) ? Report::find($request->input('reportId'))->toArray() ?? ['id' => null, 'filename' => '', 'fileType' => ''] : ['id' => null, 'filename' => '', 'fileType' => ''];
+		    $report = ($request->has('reportId')) ? Report::find($request->input('reportId'))?->toArray() ?? ['id' => null, 'filename' => '', 'fileType' => ''] : ['id' => null, 'filename' => '', 'fileType' => ''];
 				if(!$request->user()->isAdmin() && $report['id']!==null) {
 					if($report['user_id']!==$request->user()->id){
                         if(count($request->user()->reportViews()->where('report_id', $report['id'])->get()->toArray())==0) {
@@ -88,7 +89,8 @@ class ReportController extends Controller
             'fileType' => ['required','string', Rule::in(['report', 'template']),],
             'share' => 'required|string'
         ]);
-        $sharedIds = explode(",", $validated['share']);
+
+        $sharedIds = $validated['share']==="0"?[]:explode(",", $validated['share']);
         unset($validated['share']);
         $report = $request->user()->reports()->create($validated)->toArray();
         if(count($sharedIds)>0){
@@ -135,7 +137,8 @@ class ReportController extends Controller
 	        'fileType' => ['required','string', Rule::in(['report', 'template']),],
 	        'share' => 'required|string'
         ]);
-	    $sharedIds = explode(",", $validated['share']);
+
+	    $sharedIds = $validated['share']==="0"?[]:explode(",", $validated['share']);
 	    unset($validated['share']);
 	    $report->update($validated);
 
@@ -146,38 +149,39 @@ class ReportController extends Controller
 		    $currentViewerIds[] = $viewer['user_id'];
 	    }
 
+
         $newSharedIds = [...$sharedIds];
-        if(count($sharedIds)>0){
-		    $views = [];
-		    foreach ($sharedIds as $sharedId){
-                $index = array_search($sharedId, $currentViewerIds);
-                if($index){
-                    unset($currentViewerIds[$index]);
-                    continue;
-                }
-			    $views[] = [
-				    'user_id' => $sharedId,
-				    'report_id' => $report['id'],
-				    'updated_at'=>date('Y-m-d H:i:s'),
-				    'created_at'=>date('Y-m-d H:i:s'),
-			    ];
-		    }
+
+			    $views = [];
+			    foreach ($sharedIds as $sharedId){
+            $index = array_search($sharedId, $currentViewerIds);
+            if($index!==false){
+                unset($currentViewerIds[$index]);
+            }else {
+	            $views[] = [
+		            'user_id' => $sharedId,
+		            'report_id' => $report['id'],
+		            'updated_at' => date('Y-m-d H:i:s'),
+		            'created_at' => date('Y-m-d H:i:s'),
+	            ];
+            }
+			    }
             if(count($views)>0) {
 	            ReportViewer::insert($views);
             }
 
             if(count($currentViewerIds)>0){
                 $newViews = ReportViewer::where('report_id', $report->id)->get();
+
                 foreach ($newViews as $newView){
-	                $index = array_search($newView->user_id, $currentViewerIds);
-	                if($index){
+	                $exists = in_array($newView->user_id, $currentViewerIds);
+	                if($exists){
 		                ReportViewer::find($newView->id)->delete();
 	                }
                 }
             }
-	    }
-
-	    $users = User::whereIn('id', $newSharedIds)->get();
+			Log::info(implode("", $newSharedIds));
+	    $users = count($newSharedIds)>0?User::whereIn('id', $newSharedIds)->get():[];
 	    $arr['users'] = $users;
 
         return Response($arr);

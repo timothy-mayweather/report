@@ -19,6 +19,12 @@ export default function Authenticated({ user, header, children }) {
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
                             </div>
+                            {user.isAdmin&&
+                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink hrefRoute='users.index' >
+                                    Users
+                                </NavLink>
+                            </div>}
 
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink hrefRoute='reports.index' preserveState>
@@ -96,9 +102,10 @@ export default function Authenticated({ user, header, children }) {
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
+                        {user.isAdmin&&
+                        <ResponsiveNavLink href={route('users.index')} active={route().current('users.index')}>
+                            Users
+                        </ResponsiveNavLink>}
                         <ResponsiveNavLink href={route('reports.index')} active={route().current('reports.index')}>
                             Records
                         </ResponsiveNavLink>

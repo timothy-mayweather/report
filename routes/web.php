@@ -54,7 +54,7 @@ Route::middleware('auth')->group(function () {
 	Route::resource('reports', ReportController::class)->middleware(['auth','verified']);
 	Route::get('templates', [ReportController::class, 'templates']);
 	Route::get('/template/{report}', [ReportController::class, 'template']);
-	Route::get('users', [UserController::class, 'index']);
+	Route::resource('users', UserController::class)->only(['index','create', 'update'])->withTrashed(['update']);
 });
 
 require __DIR__.'/auth.php';
