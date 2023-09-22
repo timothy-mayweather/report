@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Report;
+use App\Models\EmploymentRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -13,26 +14,36 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-					User::insert([
-						[
-							'name' => 'Timothy Kibalama',
-							'email' => 'timkibalama@gmail.com',
-							'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',
-							'role' => 'admin',
-							'created_at'=>date('Y-m-d H:i:s'),
-							'updated_at'=>date('Y-m-d H:i:s'),
-							'email_verified_at'=>date('Y-m-d H:i:s'),
-						],
-						[
-							'name' => 'Mwesezi Godwin',
-							'email' => 'mwessygodleeh@gmail.com',
-							'password' => '$2y$10$WGhdS3R.wzkFV.UQ52TGAeT5AEbSxaq.4BSFXtlM8kzh6eq55Sa8e',
-							'role' => 'admin',
-							'created_at'=>date('Y-m-d H:i:s'),
-							'updated_at'=>date('Y-m-d H:i:s'),
-							'email_verified_at'=>date('Y-m-d H:i:s'),
-						]
-					]);
+        EmploymentRole::insert([
+            [
+                'name'=>'employee',
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s'),
+            ]
+        ]);
+
+        User::insert([
+            [
+                'name' => 'Timothy Kibalama',
+                'email' => 'timkibalama@gmail.com',
+                'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',
+                'role' => 'admin',
+                'employmentRoles' => "[1]",
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'email_verified_at'=>date('Y-m-d H:i:s'),
+            ],
+            [
+                'name' => 'Mwesezi Godwin',
+                'email' => 'mwessygodleeh@gmail.com',
+                'password' => '$2y$10$WGhdS3R.wzkFV.UQ52TGAeT5AEbSxaq.4BSFXtlM8kzh6eq55Sa8e',
+                'role' => 'admin',
+                'employmentRoles' => "[1]",
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'email_verified_at'=>date('Y-m-d H:i:s'),
+            ]
+        ]);
 
 	    $recordTable = "<table>\n" .
 	    "                    <thead>\n" .

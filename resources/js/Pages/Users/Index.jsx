@@ -4,10 +4,11 @@ import {Head} from '@inertiajs/react'
 import PrimaryButton from "@/Components/PrimaryButton.jsx";
 import UserEditModal from "@/Components/UserEditModal.jsx";
 
-function UserView({fetchedUsers}){
+function UserView({fetchedUsers, fetchedRoles}){
+    let roles = Object.fromEntries(new Map(fetchedRoles.map((us)=>[us.id, us])))
     const [users, setUsers] = useState(Object.fromEntries(new Map(fetchedUsers.map((us)=>[us.id, us]))))
     const [showModal, setShowModal] = useState(false)
-    const [currentUser, setCurrentUser] = useState(fetchedUsers[0])
+    const [currentUser, setCurrentUser] = useState({})
     const [respUser, setRespUser] = useState(null)
 
     useEffect(() => {
@@ -34,18 +35,18 @@ function UserView({fetchedUsers}){
 
     function show(us){
         setCurrentUser(us)
-        setShowModal(true)
     }
 
     return (
         <div>
-            <UserEditModal showModal={showModal} setShowModal={setShowModal} currentUser={currentUser} setRespUser={setRespUser}/>
+            <UserEditModal showModal={showModal} setShowModal={setShowModal} currentUser={currentUser} setCurrentUser={setCurrentUser} setRespUser={setRespUser} roles={fetchedRoles}/>
             <table id={tableId} className="cell-border hover">
                 <thead>
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Role</th>
+                    <th>Roles</th>
+                    <th>Type</th>
                     <th>Status</th>
                     <th>Email Verified</th>
                     <th></th>
@@ -55,6 +56,7 @@ function UserView({fetchedUsers}){
                 {Object.values(users).map((us)=><tr key={us.id}>
                     <td>{us.name}</td>
                     <td>{us.email}</td>
+                    <td>{JSON.parse(us.employmentRoles).map((i)=>roles[i].name).join(" | ")}</td>
                     <td>{us.role}</td>
                     <td>{us.deleted_at!==null?"Deactivated":us.role==="provisional"?"Not Approved":"Active"}</td>
                     <td>{us.email_verified_at===null?"No":"Yes"}</td>
@@ -70,14 +72,14 @@ function UserView({fetchedUsers}){
     );
 }
 
-export default function Index({auth, users}) {
+export default function Index({auth, users, roles}) {
     let user = {...auth.user, isAdmin:auth.user.role==="admin"};
 
     return (
         <Authenticated user={user}>
             <Head title="Users"/>
             <div className="mx-auto p-4 sm:p-6 lg:p-8 bg-white">
-                <UserView fetchedUsers={users} />
+                <UserView fetchedUsers={users} fetchedRoles={roles}/>
             </div>
         </Authenticated>
     );

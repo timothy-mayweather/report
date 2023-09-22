@@ -106,12 +106,12 @@ export default  function SaveModal({setShowSaveModal, showSaveModal, fileDetails
             <div className="px-6 py-6">
                 {/*{fileDetails.id===null && <><div className="text-green-700 font-bold text-lg">Please enter file name now to enable auto save</div><br /></>}*/}
                 <label className="mr-2">Enter Name</label><input name="filename" type="text" value={fileDetails.filename} onInput={setData} /><br/><br/>
-                {user.isAdmin&&<><label className="mr-2">As</label>
-                <select name="fileType" value={fileDetails.fileType} onChange={setData}>
-                    <option value=""></option>
-                    <option value="report">Report</option>
-                    <option value="template">Template</option>
-                </select><br/><br/></>}
+                {/*{user.isAdmin&&<><label className="mr-2">As</label>*/}
+                {/*<select name="fileType" value={fileDetails.fileType} onChange={setData}>*/}
+                {/*    <option value=""></option>*/}
+                {/*    <option value="report">Report</option>*/}
+                {/*    <option value="template">Template</option>*/}
+                {/*</select><br/><br/></>}*/}
                 {!user.isAdmin&&<button className="inline-flex items-center py-2 border border-transparent" type="button" onClick={getUsers}>
                     <span className="hover:text-gray-700 mr-2">Share With:</span>
                     <span>{Object.keys(selected.current).filter((id)=>selected.current[id]).map((id)=>membersData[id]['email']).toString()}</span>

@@ -27,14 +27,8 @@ class ReportController extends Controller
 	                        $report = ['id' => null, 'filename' => '', 'fileType' => ''];
                         }
 					}else{
-                        $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
-                        $viewerIds = [];
-                        foreach ($viewers as $viewer){
-                            $viewerIds[] = $viewer['user_id'];
-                        }
-                        $users = User::whereIn('id', $viewerIds)->get();
-                        $report['users'] = $users;
-                    }
+						$report = $this->getReport($report);
+					}
 				}
         return Inertia::render('Reports/Index',['report'=>$report]);
     }
@@ -84,7 +78,7 @@ class ReportController extends Controller
     public function store(Request $request): \Illuminate\Http\Response
     {
         $validated = $request->validate([
-            'filename' => 'required|string',
+            'filename' => 'required|string|unique:reports',
             'content' => 'required|string',
             'fileType' => ['required','string', Rule::in(['report', 'template']),],
             'share' => 'required|string'
@@ -106,15 +100,9 @@ class ReportController extends Controller
             ReportViewer::insert($views);
         }
 
-	    $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
-	    $viewerIds = [];
-	    foreach ($viewers as $viewer){
-		    $viewerIds[] = $viewer['user_id'];
-	    }
-	    $users = User::whereIn('id', $viewerIds)->get();
-	    $report['users'] = $users;
+	    $report = $this->getReport($report);
 
-        return Response($report);
+	    return Response($report);
     }
 
     /**
@@ -190,10 +178,26 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Report $report): RedirectResponse
+    public function destroy(Report $report): RedirectResponse
     {
         $report->delete();
 
         return redirect(route('reports.index'));
     }
+
+	/**
+	 * @param $report
+	 * @return mixed
+	 */
+	public function getReport($report): array
+	{
+		$viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
+		$viewerIds = [];
+		foreach ($viewers as $viewer) {
+			$viewerIds[] = $viewer['user_id'];
+		}
+		$users = User::whereIn('id', $viewerIds)->get();
+		$report['users'] = $users;
+		return $report;
+	}
 }

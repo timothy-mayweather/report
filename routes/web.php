@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
 	Route::get('templates', [ReportController::class, 'templates']);
 	Route::get('/template/{report}', [ReportController::class, 'template']);
 	Route::resource('users', UserController::class)->only(['index','create', 'update'])->withTrashed(['update']);
+    Route::resource('roles', RoleController::class)->only(['index','create', 'store', 'update','destroy']);
 });
 
 require __DIR__.'/auth.php';

@@ -42,7 +42,7 @@ export default function ReportModal({user}) {
             }
 
         }).catch((error)=>{
-            $.notify(error.message) //show error
+            $.notify(error.response.data.message??error)
         })
     }
 

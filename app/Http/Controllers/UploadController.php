@@ -41,6 +41,17 @@ class UploadController extends Controller
 			],
 		);
 
-		return redirect()->back()->with('success',['urls'=>['default'=>$request->getUriForPath("/storage/uploads/$name")]]);
+		return redirect()->back()->with('success', ['urls' => ['default' => $request->getUriForPath("/storage/uploads/$name")]]);
 	}
+
+
+	public function destroy(Media $media): Response
+	{
+		if(Storage::has($media->path)){
+			Storage::delete($media->path);
+		}
+		$media->delete();
+		return Response(Media::orderBy('id', 'DESC')->get());
+	}
+
 }

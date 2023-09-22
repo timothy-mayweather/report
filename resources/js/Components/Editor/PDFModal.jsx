@@ -1,16 +1,24 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Modal from "@/Components/Modal.jsx";
 import PrimaryButton from "@/Components/PrimaryButton.jsx";
 
-export default  function PDFModal({setShowSavePDFModal, showSavePDFModal}){
+export default  function PDFModal({setShowSavePDFModal, showSavePDFModal, fileDetails}){
     const [data, setData] = useState({
         filename: "", pdfType: "image"
     });
 
     const [showError, setShowError] = useState(false);
 
+    useEffect(() => {
+        setData({...data, filename: fileDetails.filename})
+    }, [showSavePDFModal]);
+
     function changeData(ev){
         setData({...data, [ev.target.name]:ev.target.value})
+    }
+
+    function close(){
+        setShowSavePDFModal(false)
     }
 
     function generatePDF(){
@@ -56,9 +64,9 @@ export default  function PDFModal({setShowSavePDFModal, showSavePDFModal}){
     }
 
     return (
-        <Modal onClose={()=>setShowSavePDFModal(false)} show={showSavePDFModal}>
+        <Modal onClose={close} show={showSavePDFModal}>
             <div className="px-6 py-6">
-                <label className="mr-2">Enter filename</label><input name="filename" type="text" onInput={changeData} /><span> .pdf</span><br/><br/>
+                <label className="mr-2">Enter filename</label><input name="filename" type="text" onInput={changeData} value={data.filename}/><span> .pdf</span><br/><br/>
                 {/*<label className="mr-2">Choose type</label>*/}
                 {/*<select name="pdfType" onChange={changeData}>*/}
                 {/*    <option value=""></option>*/}
@@ -71,7 +79,7 @@ export default  function PDFModal({setShowSavePDFModal, showSavePDFModal}){
                         Download
                     </PrimaryButton>
 
-                    <PrimaryButton className="bg-red-600 hover:bg-red-600" onClick={()=>setShowSavePDFModal(false)}>
+                    <PrimaryButton className="bg-red-600 hover:bg-red-600" onClick={close}>
                         Cancel
                     </PrimaryButton>
                 </div>

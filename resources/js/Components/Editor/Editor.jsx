@@ -12,8 +12,8 @@ import ReportModal from "@/Components/Editor/ReportModal.jsx";
 
 
 export default function Editor({user, report}) {
-    if(!user.isAdmin && report['id']===null){
-        report['fileType'] = 'report'
+    if(report['id']===null){
+        report['fileType'] = user.isAdmin?'template':'report'
     }
     const [fileDetails, setFileDetails] = useState({
         id:report['id'], filename:report['filename'], fileType:report['fileType']
@@ -52,7 +52,7 @@ export default function Editor({user, report}) {
                     $.notify('An error occurred')
                 }
             }).catch(error => {
-                $.notify(error)
+                $.notify(error.response.data.message??error)
             })
             close();
         }
@@ -111,7 +111,7 @@ export default function Editor({user, report}) {
             </div>
             {/*file prompt modal*/}
             <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user} selected={selected} selectedShared={selectedShared} initialMembers={report.hasOwnProperty('users')?Object.fromEntries(new Map(report.users.map((us)=>[us.id, us]))):{}}/>
-            <PDFModal setShowSavePDFModal={setShowSavePDFModal} showSavePDFModal={showSavePDFModal}/>
+            <PDFModal setShowSavePDFModal={setShowSavePDFModal} showSavePDFModal={showSavePDFModal} fileDetails={fileDetails}/>
             {clickedCell &&<LockModal setShowLockModal={setShowLockModal} showLockModal={showLockModal} cell={clickedCell}/>}
             <div className="ml-3">
                 <span className="inline-flex rounded-md mr-6 mt-3">

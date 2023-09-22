@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reports', function (Blueprint $table) {
+        Schema::create('employment_roles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-						$table->string('filename')->unique();
-						$table->enum('fileType', ['report', 'template']);
-            $table->longText('content');
+            $table->string('name')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reports');
+        Schema::dropIfExists('employment_roles');
     }
 };

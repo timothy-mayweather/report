@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('report_id')->index('reports_viewed')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->index('report_viewers_index')->constrained()->cascadeOnDelete();
+						$table->foreignId('sender_id')->index('report_senders_index')->constrained()->cascadeOnDelete()->references('id')->on('users');
+						$table->foreignId('report_viewers_id')->nullable()->constrained()->cascadeOnDelete();
+						$table->boolean('read')->default(false);
             $table->timestamps();
         });
     }

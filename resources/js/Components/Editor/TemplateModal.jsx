@@ -51,7 +51,8 @@ export default function TemplateModal({user}) {
                 $.notify('an error occurred')
             }
         }).catch((error)=>{
-            $.notify(error.message)//show error
+            $.notify(error.response.data.message??error)
+            // $.notify(error.message)//show error
         })
     }
 
