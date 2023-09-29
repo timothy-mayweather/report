@@ -8,7 +8,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,21 +41,33 @@ Route::get('/command', static function (Request $request){
 });
 
 
-Route::middleware('auth')->group(function () {
-	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-	Route::get('/dashboard', function () {
-		return Inertia::render('Dashboard', ['init'=>json_encode([]), 'people'=>json_encode([])]);
-	})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    /** profile routes **/
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    /** end of profile routes **/
+    Route::resource('upload', App\Http\Controllers\UploadController::class)->only(['index','store']);
+    /** report routes **/
+    Route::get('/reports/shared', [ReportController::class, 'createShared'])->name('reports.shared');
+    Route::resource('reports', ReportController::class);
+    Route::get('templates', [ReportController::class, 'templates']);
+    Route::get('/template/{report}', [ReportController::class, 'template']);
+    /** end of report routes **/
 
-	Route::resource('upload', App\Http\Controllers\UploadController::class)->only(['index','store'])->middleware(['auth','verified']);
-	Route::get('/reports/shared', [ReportController::class, 'createShared'])->name('reports.shared');
-	Route::resource('reports', ReportController::class)->middleware(['auth','verified']);
-	Route::get('templates', [ReportController::class, 'templates']);
-	Route::get('/template/{report}', [ReportController::class, 'template']);
-	Route::resource('users', UserController::class)->only(['index','create', 'update'])->withTrashed(['update']);
-    Route::resource('roles', RoleController::class)->only(['index','create', 'store', 'update','destroy']);
+    /** admin routes */
+    Route::middleware('admin')->group(function () {
+
+        Route::resource('users', UserController::class)->only(['index','create', 'update'])->withTrashed(['update']);
+        Route::resource('roles', RoleController::class)->only(['index','create', 'store', 'update','destroy']);
+
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::get('/reports/shared', [ReportController::class, 'createShared'])->name('reports.shared');
+            Route::resource('reports', ReportController::class);
+            Route::get('templates', [ReportController::class, 'templates'])->name('templates');
+            Route::get('/template/{report}', [ReportController::class, 'template'])->name('template');
+        });
+    });
 });
 
 require __DIR__.'/auth.php';

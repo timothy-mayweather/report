@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {CKEditor} from "@ckeditor/ckeditor5-react";
 import UploadAdapter from "@/Helpers/UploadAdapter.js";
 import FileModal from "@/Components/Editor/FileModal.jsx";
@@ -13,7 +13,7 @@ import ReportModal from "@/Components/Editor/ReportModal.jsx";
 
 export default function Editor({user, report}) {
     if(report['id']===null){
-        report['fileType'] = user.isAdmin?'template':'report'
+        report['fileType'] = user.isAdminRoute?'template':'report'
     }
     const [fileDetails, setFileDetails] = useState({
         id:report['id'], filename:report['filename'], fileType:report['fileType']
@@ -22,7 +22,7 @@ export default function Editor({user, report}) {
     const [showSavePDFModal, setShowSavePDFModal] = useState(false)
     const [showLockModal, setShowLockModal] = useState(false)
     const [showTools, setShowTools] = useState(true)
-    const [readonly, setReadonly] = useState(false)
+    const [readonly, setReadonly] = useState(report['id']!==null)
     const [clickedCell, setClickedCell] = useState(null)
     const [selectedShared, setSelectedShared] = useState(!report.hasOwnProperty('users')?{}:Object.fromEntries(new Map(report.users.map((us)=>[us.id, true]))))
     // const [selected, setSelected] = useState(selectedShared)//set of ids with true if selected or false otherwise
@@ -64,16 +64,16 @@ export default function Editor({user, report}) {
         setShowTools(showState)
     }
 
-    function toggleReadonly(){
-        readonly?editor.disableReadOnlyMode('lock-all'):editor.enableReadOnlyMode('lock-all');
-    }
+    useEffect(() => {
+        readonly?editor.enableReadOnlyMode('lock-all'):editor.disableReadOnlyMode('lock-all');
+    }, [readonly]);
 
     function onClickSave(){
         (fileDetails.id===null)?setShowSaveModal(true):edit()
     }
 
     function removeEditing(){
-        if(!user.isAdmin) {
+        if(!user.isAdminRoute) {
             const adminAreas = document.getElementsByClassName('perm-admin');
             const supervisorAreas = document.getElementsByClassName('perm-supervisor');
             const employeeAreas = document.getElementsByClassName('perm-employee');
@@ -120,7 +120,7 @@ export default function Editor({user, report}) {
                 <span className="inline-flex rounded-md mr-6">
                     Name: {fileDetails.filename}
                 </span>
-                {user.isAdmin&&<span className="inline-flex rounded-md mr-6">
+                {user.isAdminRoute&&<span className="inline-flex rounded-md mr-6">
                     Type: {fileDetails.fileType}
                 </span>}
                 {fileDetails.id===null? <span className="inline-flex rounded-md mr-6">
@@ -140,18 +140,19 @@ export default function Editor({user, report}) {
                 <FileModal />
                 <ReportModal user={user}/>
                 <TemplateModal user={user}/>
-                <span className="inline-flex rounded-md">
-                    <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={onClickSave}>
-                        <span className="hover:text-gray-700">Save</span>
-                    </button>
-                </span>
                 {/*<span className="inline-flex rounded-md">|</span>*/}
                 <span className="inline-flex rounded-md">
                     <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={()=>setShowSavePDFModal(true)}>
                         <span className="hover:text-gray-700">download PDF</span>
                     </button>
                 </span>
-                <ReadonlyButton onClick={toggleReadonly} readonly={readonly} />
+                {!readonly&&
+                    <span className="inline-flex rounded-md">
+                    <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={onClickSave}>
+                        <span className="hover:text-gray-700">Save</span>
+                    </button>
+                </span>}
+                <ReadonlyButton onClick={()=>setReadonly(!readonly)} readonly={readonly} />
                 {clickedCell &&
                 <span className="inline-flex rounded-md">
                     <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={()=>setShowLockModal(true)}>
@@ -225,12 +226,12 @@ export default function Editor({user, report}) {
                         loadData(report['content']);
                     }
 
-                    editor.on( 'change:isReadOnly', ( evt, propertyName, isReadOnly ) => {
-                        setReadonly(isReadOnly);
+                    // editor.on( 'change:isReadOnly', ( evt, propertyName, isReadOnly ) => {
+                    //     setReadonly(isReadOnly);
                         // toggleShowState(!isReadOnly);
-                    } );
+                    // } );
 
-                    if(user.isAdmin) {
+                    if(user.isAdminRoute) {
                         editor.ui.view.editable.element.addEventListener('click', (ev) => {
                             setClickedCell(ev.target.closest('td') ?? ev.target.closest('th'))
                         })

@@ -1,9 +1,7 @@
 import React, {useState} from 'react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link } from '@inertiajs/react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -22,21 +20,21 @@ export default function Authenticated({ user, header, children }) {
                                         </NavLink>
                                     </div>
                                     <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                        <NavLink hrefRoute='roles.index' >
+                                        <NavLink hrefRoute='roles.index'>
                                             Roles
                                         </NavLink>
                                     </div>
                                     <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                        <NavLink hrefRoute='reports.index' preserveState>
-                                            Admin Reports
+                                        <NavLink hrefRoute='admin.reports.index'>
+                                            All Reports
                                         </NavLink>
                                     </div>
                                 </>
                             }
 
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink hrefRoute='reports.index' preserveState>
-                                    Reports
+                                <NavLink hrefRoute='reports.index'>
+                                    My Reports
                                 </NavLink>
                             </div>
                         </div>
@@ -111,11 +109,20 @@ export default function Authenticated({ user, header, children }) {
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="pt-2 pb-3 space-y-1">
                         {user.isAdmin&&
-                        <ResponsiveNavLink href={route('users.index')} active={route().current('users.index')}>
-                            Users
-                        </ResponsiveNavLink>}
+                            <>
+                                <ResponsiveNavLink href={route('users.index')} active={route().current('users.index')}>
+                                    Users
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('roles.index')} active={route().current('roles.index')}>
+                                    Roles
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('admin.reports.index')} active={route().current('admin.reports.index')}>
+                                    All Reports
+                                </ResponsiveNavLink>
+                            </>
+                        }
                         <ResponsiveNavLink href={route('reports.index')} active={route().current('reports.index')}>
-                            Records
+                            My Reports
                         </ResponsiveNavLink>
                     </div>
 

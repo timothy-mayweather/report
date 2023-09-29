@@ -11,6 +11,7 @@ export default function ResponsiveNavLink({ active = false, className = '', chil
             } text-base font-medium focus:outline-none transition duration-150 ease-in-out ${className}`}
         >
             {children}
+            preserveState
         </Link>
     );
 }

@@ -73,10 +73,8 @@ function UserView({fetchedUsers, fetchedRoles}){
 }
 
 export default function Index({auth, users, roles}) {
-    let user = {...auth.user, isAdmin:auth.user.role==="admin"};
-
     return (
-        <Authenticated user={user}>
+        <Authenticated user={auth.user}>
             <Head title="Users"/>
             <div className="mx-auto p-4 sm:p-6 lg:p-8 bg-white">
                 <UserView fetchedUsers={users} fetchedRoles={roles}/>

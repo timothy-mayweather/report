@@ -15,7 +15,7 @@ class RoleController extends Controller
         return Response(EmploymentRole::all());
     }
 
-    public function index(Request $request): \Inertia\Response
+    public function index(): \Inertia\Response
     {
         return Inertia::render('Roles/Index',['roles'=>EmploymentRole::all()]);
     }
@@ -29,7 +29,8 @@ class RoleController extends Controller
         return Response($role);
     }
 
-    public function store(Request $request){
+    public function store(Request $request): Response
+    {
         $validated = $request->validate([
             'name' => 'required|unique:employment_roles'
         ]);

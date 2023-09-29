@@ -7,10 +7,10 @@ export default function ReportModal({user}) {
     const [hideDropdown, setHideDropdown] = useState(true)
     const [modalChildren, setModalChildren] = useState(<tr></tr>);
     const tableId = "reportsTable";
-    const [reportHeading, setReportHeading] = useState(user.isAdmin?"Reports":"My Reports")
+    const [reportHeading, setReportHeading] = useState(user.isAdminRoute?<span>All Reports<span className="ml-2 text-red-600 text-xl">Only edit with permission!</span></span>:"Reports")
     // ['id','filename','fileType','created_at','updated_at']
-    function showReports(url = "/reports/create"){
-        if(!user.isAdmin)
+    function showReports(url = route(user.isAdminRoute?'admin.reports.create':'reports.create')){
+        if(!user.isAdminRoute)
         setReportHeading(url.endsWith('create')?"My Reports":"Shared With Me")
         axios.get(url).then((response)=>{
             if(response.status === 200) {
@@ -20,7 +20,7 @@ export default function ReportModal({user}) {
                             <td>{file['fileType']}</td>
                             <td>{file['created_at']}</td>
                             <td>{file['updated_at']}</td>
-                            <td><u className="cursor-pointer" onClick={() => {router.get('/reports', {reportId:file['id']})}}>edit</u></td>
+                            <td><u className="cursor-pointer" onClick={() => {router.get((user.isAdminRoute?'/admin/reports':'/reports'), {reportId:file['id']})}}>edit</u></td>
                         </tr>
                     )
                 );
@@ -46,7 +46,7 @@ export default function ReportModal({user}) {
         })
     }
 
-    let mouseProps = user.isAdmin?{onClick:()=>showReports()}:{onMouseEnter:()=>setHideDropdown(false), onMouseLeave:()=>setHideDropdown(true)}
+    let mouseProps = user.isAdminRoute?{onClick:()=>showReports()}:{onMouseEnter:()=>setHideDropdown(false), onMouseLeave:()=>setHideDropdown(true)}
 
     return (
         <>

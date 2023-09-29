@@ -24,6 +24,16 @@ class DatabaseSeeder extends Seeder
 
         User::insert([
             [
+                'name' => 'Normal User',
+                'email' => 'normal@gmail.com',
+                'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',
+                'role' => 'normal',
+                'employmentRoles' => "[1]",
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'email_verified_at'=>date('Y-m-d H:i:s'),
+            ],
+            [
                 'name' => 'Timothy Kibalama',
                 'email' => 'timkibalama@gmail.com',
                 'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',

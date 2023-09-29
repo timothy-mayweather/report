@@ -20,7 +20,7 @@ class UserController extends Controller
 
 	public function index(Request $request): \Inertia\Response | RedirectResponse
 	{
-		return ($request->user()->isAdmin())?Inertia::render('Users/Index',['users'=>User::withTrashed()->get(), 'roles'=>EmploymentRole::all()]):redirect(RouteServiceProvider::HOME);
+		return Inertia::render('Users/Index',['users'=>User::withTrashed()->get(), 'roles'=>EmploymentRole::all()]);
 	}
 
 	public function update(Request $request, User $user):Response
