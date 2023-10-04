@@ -30,7 +30,7 @@ class ReportController extends Controller
                 $report = $this->getReport($report);
             }
         }
-        return Inertia::render(($request->has('isAdmin')?'AllReports/Index':'Reports/Index'),['report'=>$report]);
+        return Inertia::render(($request->has('isAdmin')?'Templates/Index':'Reports/Index'),['report'=>$report]);
     }
 
     /**

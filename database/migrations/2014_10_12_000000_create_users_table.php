@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->json('employmentRoles');
             $table->enum('role', ['admin', 'normal', 'provisional'])->default('provisional');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

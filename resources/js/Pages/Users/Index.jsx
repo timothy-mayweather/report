@@ -5,6 +5,7 @@ import PrimaryButton from "@/Components/PrimaryButton.jsx";
 import UserEditModal from "@/Components/UserEditModal.jsx";
 
 function UserView({fetchedUsers, fetchedRoles}){
+    console.log(fetchedUsers)
     let roles = Object.fromEntries(new Map(fetchedRoles.map((us)=>[us.id, us])))
     const [users, setUsers] = useState(Object.fromEntries(new Map(fetchedUsers.map((us)=>[us.id, us]))))
     const [showModal, setShowModal] = useState(false)
@@ -56,7 +57,7 @@ function UserView({fetchedUsers, fetchedRoles}){
                 {Object.values(users).map((us)=><tr key={us.id}>
                     <td>{us.name}</td>
                     <td>{us.email}</td>
-                    <td>{JSON.parse(us.employmentRoles).map((i)=>roles[i].name).join(" | ")}</td>
+                    <td>{us.employmentRoles.map((r)=>roles[r.id].name).join(" | ")}</td>
                     <td>{us.role}</td>
                     <td>{us.deleted_at!==null?"Deactivated":us.role==="provisional"?"Not Approved":"Active"}</td>
                     <td>{us.email_verified_at===null?"No":"Yes"}</td>

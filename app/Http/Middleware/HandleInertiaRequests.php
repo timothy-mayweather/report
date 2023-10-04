@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
 
@@ -31,9 +32,16 @@ class HandleInertiaRequests extends Middleware
 	public function share(Request $request): array
 	{
 		$currentUser = $request->user();
-		$user = ($currentUser!==null)?[
-			...$currentUser->toArray(),
-			...['isAdminRoute'=>in_array('admin',$request->route()->middleware(),true), 'isAdmin'=>$currentUser->isAdmin()]]:null;
+		if($currentUser!==null){
+			$user = [
+				...$currentUser->toArray(),
+				'employmentRoles'=>$request->session()->get('employmentRoles'),
+				'isAdminRoute'=>in_array('admin',$request->route()->middleware(),true),
+				'isAdmin'=>$currentUser->isAdmin()
+			];
+		}else{
+			$user = null;
+		}
 
 		return array_merge(parent::share($request), [
 			'auth' => [

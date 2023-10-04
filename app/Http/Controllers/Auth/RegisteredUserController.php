@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserRole;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -47,6 +49,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+		    UserRole::create([
+			    'user_id' => $user->id,
+			    'employment_role_id' => 1,
+			    'user_role' => $user->id.'_'.'1',
+		    ]);
+
         event(new Registered($user));
 
 //		    if($user->role=="provisional"){
@@ -54,6 +62,7 @@ class RegisteredUserController extends Controller
 //		    }
 
         Auth::login($user);
+		    $request->session()->put('employmentRoles',DB::select("select employment_roles.id as id, employment_roles.name as name from user_roles right join employment_roles on user_roles.employment_role_id = employment_roles.id where user_id=".$user->id.";"));
 
 	      return redirect(RouteServiceProvider::HOME);
     }

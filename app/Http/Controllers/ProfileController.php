@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,10 +19,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
-        ]);
+	    $request->session()->put('employmentRoles',DB::select("select employment_roles.id as id, employment_roles.name as name from user_roles right join employment_roles on user_roles.employment_role_id = employment_roles.id where user_id=".$request->user()->id.";"));
+      return Inertia::render('Profile/Edit', [
+          'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+          'status' => session('status'),
+      ]);
     }
 
     /**

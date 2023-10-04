@@ -11,7 +11,7 @@ function UserEditModal({currentUser, setCurrentUser, showModal, setShowModal, se
     useEffect(() => {
         if(currentUser.hasOwnProperty('id')) {
             setShowModal(true)
-            let currentRoles = JSON.parse(currentUser.employmentRoles);
+            let currentRoles = currentUser.employmentRoles.map((r)=>r.id);
             setEmploymentRoles({...employmentRoles, ...Object.fromEntries(new Map(roles.map((us) => [us.id, currentRoles.includes(parseInt(us.id))])))})
         }else{
             setShowModal(false)

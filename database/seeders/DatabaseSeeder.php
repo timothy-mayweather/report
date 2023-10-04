@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Report;
 use App\Models\EmploymentRole;
 use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,13 +23,12 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        User::insert([
+        foreach([
             [
                 'name' => 'Normal User',
                 'email' => 'normal@gmail.com',
                 'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',
                 'role' => 'normal',
-                'employmentRoles' => "[1]",
                 'created_at'=>date('Y-m-d H:i:s'),
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'email_verified_at'=>date('Y-m-d H:i:s'),
@@ -38,7 +38,6 @@ class DatabaseSeeder extends Seeder
                 'email' => 'timkibalama@gmail.com',
                 'password' => '$2y$10$EJMQNG4O6Nr8EEu.SU1yjeRKl.71Orm7W1zsrVY0tn5AqPjWBGSCy',
                 'role' => 'admin',
-                'employmentRoles' => "[1]",
                 'created_at'=>date('Y-m-d H:i:s'),
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'email_verified_at'=>date('Y-m-d H:i:s'),
@@ -48,12 +47,18 @@ class DatabaseSeeder extends Seeder
                 'email' => 'mwessygodleeh@gmail.com',
                 'password' => '$2y$10$WGhdS3R.wzkFV.UQ52TGAeT5AEbSxaq.4BSFXtlM8kzh6eq55Sa8e',
                 'role' => 'admin',
-                'employmentRoles' => "[1]",
                 'created_at'=>date('Y-m-d H:i:s'),
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'email_verified_at'=>date('Y-m-d H:i:s'),
             ]
-        ]);
+        ] as $user){
+					$us = User::create($user);
+					UserRole::create([
+						'user_id' => $us->id,
+						'employment_role_id' => 1,
+						'user_role' => $us->id.'_'.'1',
+					]);
+        }
 
 	    $recordTable = "<table>\n" .
 	    "                    <thead>\n" .

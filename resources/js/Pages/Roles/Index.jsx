@@ -3,10 +3,12 @@ import Authenticated from '@/Layouts/AuthenticatedLayout'
 import {Head} from '@inertiajs/react'
 import PrimaryButton from "@/Components/PrimaryButton.jsx";
 import RoleEditModal from "@/Components/RoleEditModal.jsx";
+import RoleDeleteModal from "@/Components/RoleDeleteModal.jsx";
 
 function RoleView({fetchedRoles}){
     const [roles, setRoles] = useState(Object.fromEntries(new Map(fetchedRoles.map((us)=>[us.id, us]))))
-    const [showModal, setShowModal] = useState(false)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [currentRole, setCurrentRole] = useState(fetchedRoles[0])
     const [respRole, setRespRole] = useState(null)
     const [newRole, setNewRole] = useState("");
@@ -17,10 +19,14 @@ function RoleView({fetchedRoles}){
         }
     }, [respRole]);
 
-
     function show(us){
         setCurrentRole(us)
-        setShowModal(true)
+        setShowEditModal(true)
+    }
+
+    function showDeleteView(us){
+        setCurrentRole(us)
+        setShowDeleteModal(true)
     }
 
     return (
@@ -53,15 +59,27 @@ function RoleView({fetchedRoles}){
                 </PrimaryButton>
             </div>
             <br/>
-            <RoleEditModal showModal={showModal} setShowModal={setShowModal} currentRole={currentRole} setRespRole={setRespRole} />
-            <p className="text-left text-lg font-bold">Current Roles</p>
-            <table>
+            <RoleEditModal roles={roles} showModal={showEditModal} setShowModal={setShowEditModal} currentRole={currentRole} setRespRole={setRespRole} />
+            <RoleDeleteModal currentRole={currentRole} showModal={showDeleteModal} setShowModal={setShowDeleteModal}/>
+            {/*<p className="text-left text-lg font-bold">Current Roles</p>*/}
+            <table className="text-xl">
+                <thead>
+                    <tr>
+                        <th className="text-left">Role</th>
+                        <th className="text-left">Submits Reports To:</th>
+                        <th></th>
+                    </tr>
+                </thead>
                 <tbody>
                     {Object.values(roles).map((r)=><tr key={r.id}>
-                        <td className="pr-4 pb-4 text-left"><span>+ </span>{r.name}</td>
+                        <td className="pr-4 pb-4 text-left">{r.name}</td>
+                        <td className="pr-4 pb-4 text-left">{r.shareRules.map((ru)=><span className="ml-2 px-2 py-1 rounded-xl border border-gray-400" key={ru.id}>{roles[ru.shared_role]['name']}<span className="pl-2">{ru.edit?"-Editor":"-Viewer"}</span></span>)}</td>
                         <td className="pb-4">
                             <PrimaryButton onClick={()=>{show(r)}}>
                                 EDIT
+                            </PrimaryButton>
+                            <PrimaryButton className="ml-2 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-900" onClick={()=>{showDeleteView(r)}}>
+                                DELETE
                             </PrimaryButton>
                         </td>
                     </tr>)}

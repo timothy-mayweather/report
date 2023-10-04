@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,7 +23,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'role',
-        'employmentRoles',
         'password',
     ];
 
@@ -63,5 +61,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ReportViewer::class);
     }
+
+	public function employmentRoles(): HasMany
+	{
+		return $this->hasMany(UserRole::class);
+	}
 
 }

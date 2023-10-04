@@ -31,6 +31,16 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
+                    <InputLabel htmlFor="roles" value="Roles" />
+
+                    <TextInput
+                        id="roles"
+                        className="mt-1 block w-full"
+                        value={user.employmentRoles.map((emp)=>emp.name).toString().replaceAll(",",", ")}
+                        disabled
+                    />
+                </div>
+                <div>
                     <InputLabel htmlFor="name" value="Name" />
 
                     <TextInput

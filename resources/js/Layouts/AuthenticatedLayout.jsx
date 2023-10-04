@@ -7,7 +7,7 @@ export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 text-xl">
             <nav className="bg-white border-b border-gray-100">
                 <div className="mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-10">
@@ -26,7 +26,7 @@ export default function Authenticated({ user, header, children }) {
                                     </div>
                                     <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                         <NavLink hrefRoute='admin.reports.index'>
-                                            All Reports
+                                            Templates & Reports
                                         </NavLink>
                                     </div>
                                 </>
@@ -117,7 +117,7 @@ export default function Authenticated({ user, header, children }) {
                                     Roles
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink href={route('admin.reports.index')} active={route().current('admin.reports.index')}>
-                                    All Reports
+                                    Templates & Reports
                                 </ResponsiveNavLink>
                             </>
                         }

@@ -15,18 +15,11 @@ export default function Editor({user, report}) {
     if(report['id']===null){
         report['fileType'] = user.isAdminRoute?'template':'report'
     }
-    const [fileDetails, setFileDetails] = useState({
-        id:report['id'], filename:report['filename'], fileType:report['fileType']
-    })
-    const [showSaveModal, setShowSaveModal] = useState(false)
-    const [showSavePDFModal, setShowSavePDFModal] = useState(false)
-    const [showLockModal, setShowLockModal] = useState(false)
-    const [showTools, setShowTools] = useState(true)
-    const [readonly, setReadonly] = useState(report['id']!==null)
-    const [clickedCell, setClickedCell] = useState(null)
-    const [selectedShared, setSelectedShared] = useState(!report.hasOwnProperty('users')?{}:Object.fromEntries(new Map(report.users.map((us)=>[us.id, true]))))
     // const [selected, setSelected] = useState(selectedShared)//set of ids with true if selected or false otherwise
-    const selected = useRef(selectedShared);
+    const [fileDetails, setFileDetails] = useState({
+            id: report['id'], filename: report['filename'], fileType: report['fileType']
+        }), [showSaveModal, setShowSaveModal] = useState(false), [showSavePDFModal, setShowSavePDFModal] = useState(false), [showLockModal, setShowLockModal] = useState(false), [showTools, setShowTools] = useState(true), [readonly, setReadonly] = useState(report['id'] !== null), [clickedCell, setClickedCell] = useState(null), [selectedShared, setSelectedShared] = useState(!report.hasOwnProperty('users') ? {} : Object.fromEntries(new Map(report.users.map((us) => [us.id, true])))),
+        selected = useRef(selectedShared);
 
     function edit(){
         if(fileDetails.filename.trim().length===0 || fileDetails.fileType.trim().length===0){
@@ -115,7 +108,7 @@ export default function Editor({user, report}) {
             {clickedCell &&<LockModal setShowLockModal={setShowLockModal} showLockModal={showLockModal} cell={clickedCell}/>}
             <div className="ml-3">
                 <span className="inline-flex rounded-md mr-6 mt-3">
-                    {"Report Details>"}
+                    {report['fileType'].replace(/\b\w/g, s => s.toUpperCase())+" details>"}
                 </span>
                 <span className="inline-flex rounded-md mr-6">
                     Name: {fileDetails.filename}
