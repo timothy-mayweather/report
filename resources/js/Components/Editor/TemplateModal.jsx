@@ -16,7 +16,7 @@ export default function TemplateModal({user}) {
                             <td>{file['created_at']}</td>
                             <td>{file['updated_at']}</td>
                             <td><u className="cursor-pointer" onClick={() => {loadTemplate(file['id']); $.notify('Loaded '+file['filename'], "info")}}>load</u></td>
-                            {user.isAdminRoute&&<td><u className="cursor-pointer" onClick={() => {router.get('/reports', {reportId:file['id']})}}>edit</u></td>}
+                            {user.isAdminRoute&&<td><u className="cursor-pointer" onClick={() => {router.get('/admin/reports', {reportId:file['id']})}}>edit</u></td>}
                         </tr>
                     )
                 );

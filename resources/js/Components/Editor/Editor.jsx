@@ -15,23 +15,25 @@ export default function Editor({user, report}) {
     if(report['id']===null){
         report['fileType'] = user.isAdminRoute?'template':'report'
     }
+
     // const [selected, setSelected] = useState(selectedShared)//set of ids with true if selected or false otherwise
     const [fileDetails, setFileDetails] = useState({
             id: report['id'], filename: report['filename'], fileType: report['fileType']
         }), [showSaveModal, setShowSaveModal] = useState(false), [showSavePDFModal, setShowSavePDFModal] = useState(false), [showLockModal, setShowLockModal] = useState(false), [showTools, setShowTools] = useState(true), [readonly, setReadonly] = useState(report['id'] !== null), [clickedCell, setClickedCell] = useState(null), [selectedShared, setSelectedShared] = useState(!report.hasOwnProperty('users') ? {} : Object.fromEntries(new Map(report.users.map((us) => [us.id, true])))),
-        selected = useRef(selectedShared);
+        selected = useRef(selectedShared), [members, setMembers] = useState(report.hasOwnProperty('users')?Object.fromEntries(new Map(report.users.map((us)=>[us.id, us]))):{});
+
+    const isEditable = report.hasOwnProperty('rule')?report['rule']['edit']:true
 
     function edit(){
         if(fileDetails.filename.trim().length===0 || fileDetails.fileType.trim().length===0){
             $.notify('Please enter all fields.')
         }else {
-            let idsToShare = Object.keys(selected.current).filter((id)=>selected.current[id]).toString()
-
+            let membersSharedWith = Object.keys(selected.current).filter((id)=>selected.current[id]).map((id)=>members[id])
             axios.put("/reports/"+fileDetails.id, {
                 filename: fileDetails.filename,
                 fileType: fileDetails.fileType,
                 content: getEditAreaHtml(),
-                share: idsToShare.length===0?"0":idsToShare
+                share: membersSharedWith
             }).then((response)=>{
                 if(response.status===200){
                     setFileDetails({
@@ -103,7 +105,7 @@ export default function Editor({user, report}) {
                 {/*treat data before sending it to editor from here*/}
             </div>
             {/*file prompt modal*/}
-            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user} selected={selected} selectedShared={selectedShared} initialMembers={report.hasOwnProperty('users')?Object.fromEntries(new Map(report.users.map((us)=>[us.id, us]))):{}}/>
+            <SaveModal setShowSaveModal={setShowSaveModal} showSaveModal={showSaveModal} fileDetails={fileDetails} setFileDetails={setFileDetails} edit={edit} user={user} selected={selected} selectedShared={selectedShared} initialMembers={members} resetMembers={setMembers}/>
             <PDFModal setShowSavePDFModal={setShowSavePDFModal} showSavePDFModal={showSavePDFModal} fileDetails={fileDetails}/>
             {clickedCell &&<LockModal setShowLockModal={setShowLockModal} showLockModal={showLockModal} cell={clickedCell}/>}
             <div className="ml-3">
@@ -113,9 +115,9 @@ export default function Editor({user, report}) {
                 <span className="inline-flex rounded-md mr-6">
                     Name: {fileDetails.filename}
                 </span>
-                {user.isAdminRoute&&<span className="inline-flex rounded-md mr-6">
-                    Type: {fileDetails.fileType}
-                </span>}
+                {/*{user.isAdminRoute&&<span className="inline-flex rounded-md mr-6">*/}
+                {/*    Type: {fileDetails.fileType}*/}
+                {/*</span>}*/}
                 {fileDetails.id===null? <span className="inline-flex rounded-md mr-6">
                     Not saved
                 </span>:
@@ -145,7 +147,7 @@ export default function Editor({user, report}) {
                         <span className="hover:text-gray-700">Save</span>
                     </button>
                 </span>}
-                <ReadonlyButton onClick={()=>setReadonly(!readonly)} readonly={readonly} />
+                {isEditable &&<ReadonlyButton onClick={()=>setReadonly(!readonly)} readonly={readonly} />}
                 {clickedCell &&
                 <span className="inline-flex rounded-md">
                     <button className="inline-flex items-center px-3 py-2 border border-transparent" type="button" onClick={()=>setShowLockModal(true)}>

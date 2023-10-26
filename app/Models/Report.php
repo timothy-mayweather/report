@@ -15,7 +15,8 @@ class Report extends Model
         'user_id',
         'filename',
         'fileType', //'report', 'template'
-        'content'
+        'content',
+        'senderRoleId'
     ];
 
 

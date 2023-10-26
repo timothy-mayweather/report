@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\ReportViewer;
+use App\Models\ShareRule;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-//use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,8 +24,16 @@ class ReportController extends Controller
         $report = ($request->has('reportId')) ? Report::find($request->input('reportId'))?->toArray() ?? ['id' => null, 'filename' => '', 'fileType' => ''] : ['id' => null, 'filename' => '', 'fileType' => ''];
         if(!$request->has('isAdmin') && $report['id']!==null) {
             if($report['user_id']!==$request->user()->id){
-                if(count($request->user()->reportViews()->where('report_id', $report['id'])->get()->toArray())==0) {
+                $shareDetails = $request->user()->reportViews()->where('report_id', $report['id'])->get()->toArray();
+                if(count($shareDetails)==0) {
                     $report = ['id' => null, 'filename' => '', 'fileType' => ''];
+                }else{
+                    $rules = ShareRule::where('role_shared', $report['senderRoleId'].'_'.$shareDetails[0]['employment_role_id'])->get()->toArray();
+                    if(count($rules)==0) {
+                        $report = ['id' => null, 'filename' => '', 'fileType' => ''];
+                    }else{
+                        $report['rule'] = $rules[0];
+                    }
                 }
             }else{
                 $report = $this->getReport($report);
@@ -81,18 +90,24 @@ class ReportController extends Controller
             'filename' => 'required|string|unique:reports',
             'content' => 'required|string',
             'fileType' => ['required','string', Rule::in(['report', 'template']),],
-            'share' => 'required|string'
+            'senderRoleId' => 'required|integer',
+            'share' => 'array'
         ]);
 
-        $sharedIds = $validated['share']==="0"?[]:explode(",", $validated['share']);
+        $usersShared = $validated['share'];
         unset($validated['share']);
         $report = $request->user()->reports()->create($validated)->toArray();
-        if(count($sharedIds)>0){
+        if(count($usersShared)>0){
+            $rules = ShareRule::all();
+
             $views = [];
-            foreach ($sharedIds as $sharedId){
+            foreach ($usersShared as $userShared){
                 $views[] = [
-                    'user_id' => $sharedId,
+                    'user_id' => $userShared['id'],
                     'report_id' => $report['id'],
+                    'employment_role_id' => $userShared['employment_role_id'],
+                    'sender_id' => $request->user()->id,
+                    'share_rule_id' => $rules->firstWhere('role_shared', $report['senderRoleId'].'_'.$userShared['employment_role_id'])?->id,
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'created_at'=>date('Y-m-d H:i:s'),
                 ];
@@ -123,10 +138,10 @@ class ReportController extends Controller
             'filename' => 'required|string',
             'content' => 'required|string',
             'fileType' => ['required','string', Rule::in(['report', 'template']),],
-            'share' => 'required|string'
+            'share' => 'array'
         ]);
 
-        $sharedIds = $validated['share']==="0"?[]:explode(",", $validated['share']);
+        $usersShared = $validated['share'];
         unset($validated['share']);
         $report->update($validated);
 
@@ -138,17 +153,20 @@ class ReportController extends Controller
         }
 
 
-        $newSharedIds = [...$sharedIds];
+        $newSharedIds = [];
 
         $views = [];
-        foreach ($sharedIds as $sharedId){
-            $index = array_search($sharedId, $currentViewerIds);
+        foreach ($usersShared as $userShared){
+            $newSharedIds[] = $userShared['id'];
+            $index = array_search($userShared['id'], $currentViewerIds);
             if($index!==false){
                 unset($currentViewerIds[$index]);
             }else {
                 $views[] = [
-                    'user_id' => $sharedId,
+                    'user_id' => $userShared['id'],
                     'report_id' => $report['id'],
+                    'employment_role_id' => $userShared['employment_role_id'],
+                    'sender_id' => $request->user()->id,
                     'updated_at' => date('Y-m-d H:i:s'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
@@ -168,7 +186,7 @@ class ReportController extends Controller
                 }
             }
         }
-//        Log::info(implode("", $newSharedIds));
+
         $users = count($newSharedIds)>0?User::whereIn('id', $newSharedIds)->get():[];
         $arr['users'] = $users;
 
@@ -191,13 +209,20 @@ class ReportController extends Controller
      */
     public function getReport($report): array
     {
-        $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id'])->toArray();
+        $viewers = ReportViewer::where('report_id', $report['id'])->get(['user_id','report_id','employment_role_id','sender_id'])->toArray();
         $viewerIds = [];
+        $viewerData = [];
         foreach ($viewers as $viewer) {
             $viewerIds[] = $viewer['user_id'];
+            $viewerData[$viewer['user_id']] = $viewer;
         }
-        $users = User::whereIn('id', $viewerIds)->get();
-        $report['users'] = $users;
+
+        $users = User::whereIn('id', $viewerIds)->get()->toArray();
+        $newUsers = [];
+        foreach ($users as $user){
+            $newUsers[] = [...$user, ...$viewerData[$user['id']]];
+        }
+        $report['users'] = $newUsers;
         return $report;
     }
 }

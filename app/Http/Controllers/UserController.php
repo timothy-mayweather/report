@@ -3,26 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmploymentRole;
+use App\Models\ShareRule;
 use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 
 class UserController extends Controller
 {
-	public function create(): Response
+	public function create(Request $request): Response
 	{
-//		$users = User::where('role', "normal")->get(['id','name','email','role']);
-//		$usersArray = [];
-//		foreach ($users as $user){
-//			$user->employmentRoles = $user->employmentRoles()->get(["employment_role_id"]);
-//			$usersArray[] = [...$user->toArray(), "employmentRoles"=>$user->employmentRoles()->get(["employment_role_id"])];
-//		}
-//		return Response($usersArray);
-		return Response(User::where('role', "normal")->get(['id','name','email','role']));
+        $roleId = $request->input('role');
+        $shareRules = ShareRule::where("employment_role_id", $roleId)->get();
+        $users = [];
+        foreach ($shareRules as $rule){
+             $users = [...$users, ...DB::select("select employment_role_id, u.id, u.name, u.email from user_roles inner join users u on u.id = user_roles.user_id where employment_role_id=?;",[$rule->shared_role])];
+        }
+		return Response(["users"=>$users, "rules"=>$shareRules, "roles"=>EmploymentRole::all()]);
 	}
 
 	public function index(): \Inertia\Response | RedirectResponse

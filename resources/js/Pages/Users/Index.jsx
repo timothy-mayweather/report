@@ -5,7 +5,6 @@ import PrimaryButton from "@/Components/PrimaryButton.jsx";
 import UserEditModal from "@/Components/UserEditModal.jsx";
 
 function UserView({fetchedUsers, fetchedRoles}){
-    console.log(fetchedUsers)
     let roles = Object.fromEntries(new Map(fetchedRoles.map((us)=>[us.id, us])))
     const [users, setUsers] = useState(Object.fromEntries(new Map(fetchedUsers.map((us)=>[us.id, us]))))
     const [showModal, setShowModal] = useState(false)

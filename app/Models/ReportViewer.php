@@ -12,7 +12,10 @@ class ReportViewer extends Model
 
     protected $fillable = [
         'report_id',
-        'user_id'
+        'user_id',
+        'employment_role_id',
+        'sender_id',
+        'share_rule_id'
     ];
 
     public function user(): BelongsTo

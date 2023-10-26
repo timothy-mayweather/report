@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('share_rules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employment_role_id')->constrained()->cascadeOnDelete();
-	          $table->foreignId('shared_role')->references('id')->on('employment_roles')->constrained()->cascadeOnDelete();
-						$table->string('role_shared')->unique(); //roleId_sharedRoleId
-						$table->boolean('edit')->default(false);
+            $table->foreignId('shared_role')->references('id')->on('employment_roles')->constrained()->cascadeOnDelete();
+            $table->string('role_shared')->unique(); //roleId_sharedRoleId
+            $table->boolean('edit')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

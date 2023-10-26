@@ -10,8 +10,11 @@ export default function ReportModal({user}) {
     const [reportHeading, setReportHeading] = useState(user.isAdminRoute?<span>All Reports<span className="ml-2 text-red-600 text-xl">Only edit with permission!</span></span>:"Reports")
     // ['id','filename','fileType','created_at','updated_at']
     function showReports(url = route(user.isAdminRoute?'admin.reports.create':'reports.create')){
-        if(!user.isAdminRoute)
-        setReportHeading(url.endsWith('create')?"My Reports":"Shared With Me")
+        let isShared = false;
+        if(!user.isAdminRoute) {
+            isShared = !url.endsWith('create')
+            setReportHeading(!isShared ? "My Reports" : "Shared With Me")
+        }
         axios.get(url).then((response)=>{
             if(response.status === 200) {
                 setModalChildren(response.data.map(
@@ -20,7 +23,7 @@ export default function ReportModal({user}) {
                             <td>{file['fileType']}</td>
                             <td>{file['created_at']}</td>
                             <td>{file['updated_at']}</td>
-                            <td><u className="cursor-pointer" onClick={() => {router.get((user.isAdminRoute?'/admin/reports':'/reports'), {reportId:file['id']})}}>edit</u></td>
+                            <td><u className="cursor-pointer" onClick={() => {router.get((user.isAdminRoute?'/admin/reports':'/reports'), {reportId:file['id']})}}>view</u></td>
                         </tr>
                     )
                 );

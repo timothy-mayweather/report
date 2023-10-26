@@ -114,6 +114,7 @@ class DatabaseSeeder extends Seeder
 				'filename'=>'objectives template',
 				'fileType' => 'template',
 				'user_id' => 2,
+                'senderRoleId' =>1,
 				'content' => $recordTable,
 				'created_at'=>date('Y-m-d H:i:s'),
 				'updated_at'=>date('Y-m-d H:i:s')
